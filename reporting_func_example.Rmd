@@ -1,0 +1,50 @@
+---
+title: "lmerTest Reporting Test"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+This document tests the reporting functions created by Alex Danvers for printing APA-style results when using lmerTest.
+
+# Loading Libraries and Custom Functions
+
+```{r load functions}
+# load the required libraries
+library(lmerTest)
+library(piecewiseSEM)
+
+# load the custom functions I wrote
+source("~/Dropbox/R Resources/lmerT_reporting_functions.R")
+source("~/Dropbox/R Resources/sim.ml1_func.R")
+```
+
+# Creating Test Data
+
+This generates data with a single continuous predictor and single continuous outcome.
+
+```{r create test data}
+# the first number is measures per cluster, second is number of clusters
+test.dat <- sim.ml1(10,30)
+```
+
+# Estimating Models
+
+```{r estimate models}
+int.only <- lmer(y ~ 1 + (1|id), data=test.dat)
+fixed.x <- lmer(y ~ x + (1|id), data=test.dat)
+random.x <- lmer(y ~ x + (x|id), data=test.dat)
+
+# model comparisons
+comp1 <- anova(int.only, fixed.x)
+comp2 <- anova(fixed.x, random.x)
+```
+
+# Reporting
+
+We found that a model using x as a predictor fit the data significantly better than an intercept-only model (`r chi_inline(comp1)`). We then tested whether treating the predictor x as a random effect significantly improved model fit. We found that it did (`r chi_inline(comp2)`).
+
+In the fixed effects model, x was a statistically significant predictor (`r lmerT.coef(fixed.x, 2)`). It was also significant in the random effects model (`r lmerT.coef(random.x, 2)`).
+
